@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Book;
+use App\Traits\ClickHouseLoggable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class BookController extends Controller
 {
+    use ClickHouseLoggable;
+
     public function index()
     {
+        $this->logToClickHouse('book_index');
         $books = Book::with(['author', 'publisher'])->get();
         return response()->json($books);
     }
@@ -27,16 +31,18 @@ class BookController extends Controller
         ]);
 
         if ($validator->fails()) {
+            $this->logToClickHouse('book_store_failed', ['errors' => $validator->errors()->toArray()]);
             return response()->json($validator->errors(), 400);
         }
 
         $book = Book::create($request->all());
+        $this->logToClickHouse('book_store_success', ['book_id' => $book->id]);
         return response()->json($book, 200);
     }
 
-
     public function show($id)
     {
+        $this->logToClickHouse('book_show', ['book_id' => $id]);
         $book = Book::with(['author', 'publisher'])->findOrFail($id);
         return response()->json($book);
     }
@@ -55,10 +61,12 @@ class BookController extends Controller
         ]);
 
         if ($validator->fails()) {
+            $this->logToClickHouse('book_update_failed', ['book_id' => $id, 'errors' => $validator->errors()->toArray()]);
             return response()->json($validator->errors(), 400);
         }
 
         $book->update($request->all());
+        $this->logToClickHouse('book_update_success', ['book_id' => $id]);
         return response()->json($book);
     }
 
@@ -66,6 +74,7 @@ class BookController extends Controller
     {
         $book = Book::findOrFail($id);
         $book->delete();
+        $this->logToClickHouse('book_delete', ['book_id' => $id]);
         return response()->json(null, 200);
     }
 }

@@ -40,7 +40,7 @@ services:
             context: dockerfiles
             dockerfile: composer.Dockerfile
         volumes:
-            - db_data:/var/www/laravel
+            - ./src:/var/www/laravel
     artisan:
         build:
             context: dockerfiles
@@ -48,6 +48,12 @@ services:
         volumes:
             - ./src:/var/www/laravel
         entrypoint: ["php", "/var/www/laravel/artisan"]
-
+    clickhouse:
+        image: yandex/clickhouse-server
+        ports:
+            - "8123:8123"
+            - "9000:9000"
+        volumes:
+            - ./clickhouse-data:/var/lib/clickhouse
 volumes:
     db_data:
