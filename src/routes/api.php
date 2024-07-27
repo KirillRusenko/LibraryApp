@@ -5,18 +5,14 @@ use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\PublisherController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/test/', function() {
-    return \App\Models\Author::all();
-});
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Users
+Route::post('users/register', [UserController::class, 'register']);
 
-
-Route::post('register', [UserController::class, 'register']);
+// Books
+Route::get('books/available', [BookController::class, 'available']);
+Route::put('books/borrow/{id}', [BookController::class, 'borrow']);
 
 Route::apiResources([
     'authors' => AuthorController::class,

@@ -12,11 +12,16 @@ services:
             - mysql
             - php
     php:
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
         build:
             context: dockerfiles
             dockerfile: php.Dockerfile
         volumes:
             - ./src:/var/www/laravel
+            - ./dockerfiles/configs/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+        environment:
+            PHP_IDE_CONFIG: serverName=Docker
     mysql:
         image: mysql:8.0
         ports:

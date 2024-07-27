@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Traits\ClickHouseLoggable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -13,18 +12,15 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    use ClickHouseLoggable;
 
     public function index()
     {
-        $this->logToClickHouse('user_index');
         $users = User::all();
         return response()->json($users);
     }
 
     public function show($id)
     {
-        $this->logToClickHouse('user_show', ['user_id' => $id]);
         $user = User::findOrFail($id);
         return response()->json($user);
     }
@@ -40,7 +36,6 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $this->logToClickHouse('user_update_failed', ['user_id' => $id, 'errors' => $validator->errors()->toArray()]);
             return response()->json($validator->errors(), 400);
         }
 
@@ -51,7 +46,6 @@ class UserController extends Controller
             $user->save();
         }
 
-        $this->logToClickHouse('user_update_success', ['user_id' => $id]);
         return response()->json($user);
     }
 
@@ -59,7 +53,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->delete();
-        $this->logToClickHouse('user_delete', ['user_id' => $id]);
         return response()->json(null, 200);
     }
 
@@ -72,7 +65,6 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $this->logToClickHouse('user_register_failed', ['errors' => $validator->errors()->toArray()]);
             return response()->json($validator->errors(), 400);
         }
 
@@ -84,7 +76,6 @@ class UserController extends Controller
 
         $token = Str::random(15);
 
-        $this->logToClickHouse('user_register_success', ['user_id' => $user->id]);
         return response()->json([
             'user' => $user,
             'access_token' => $token,
