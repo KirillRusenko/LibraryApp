@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Middleware\ApiLogger;
+use App\Http\Middleware\AuthExtended;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;

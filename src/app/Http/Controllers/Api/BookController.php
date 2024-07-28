@@ -92,4 +92,22 @@ class BookController extends Controller
 
         return response()->json(['message' => 'Книга успешно взята'], 200);
     }
+
+    public function return($id)
+    {
+        $book = Book::find($id);
+
+        if (!$book) {
+            return response()->json(['message' => 'Книга не найдена'], 404);
+        }
+
+        if (!$book->is_borrowed) {
+            return response()->json(['message' => 'Книга ещё не взята'], 400);
+        }
+
+        $book->is_borrowed = false;
+        $book->save();
+
+        return response()->json(['message' => 'Книга успешно возвращена'], 200);
+    }
 }
