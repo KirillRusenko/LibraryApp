@@ -1,0 +1,964 @@
+openapi: 3.0.0
+info:
+  title: Library Management API
+  version: 1.0.0
+  description: >-
+    API для управления библиотекой, включая книги, авторов, издателей,
+    пользователей и сотрудников
+servers:
+  - url: http://127.0.0.1:8000/api
+    description: Локальный сервер разработки
+paths:
+  /books:
+    get:
+      summary: Получить список всех книг
+      tags:
+        - Books
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+    post:
+      summary: Создать новую книгу
+      tags:
+        - Books
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        '200':
+          description: Книга успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /books/{id}:
+    get:
+      summary: Получить информацию о конкретной книге
+      tags:
+        - Books
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Книга не найдена
+    put:
+      summary: Обновить информацию о книге
+      tags:
+        - Books
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        '200':
+          description: Книга успешно обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Книга не найдена
+    delete:
+      summary: Удалить книгу
+      tags:
+        - Books
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Книга успешно удалена
+        '404':
+          description: Книга не найдена
+  /books/available:
+    get:
+      summary: Получить список доступных книг
+      tags:
+        - Books
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+  /books/borrow/{id}:
+    put:
+      summary: Взять книгу
+      tags:
+        - Books
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Книга успешно взята
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Книга уже взята
+        '404':
+          description: Книга не найдена
+  /books/return/{id}:
+    put:
+      summary: Вернуть книгу
+      tags:
+        - Books
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Книга успешно возвращена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Книга ещё не взята
+        '404':
+          description: Книга не найдена
+  /authors:
+    get:
+      summary: Получить список всех авторов
+      tags:
+        - Authors
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+    post:
+      summary: Создать нового автора
+      tags:
+        - Authors
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+      responses:
+        '200':
+          description: Автор успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /authors/{id}:
+    get:
+      summary: Получить информацию о конкретном авторе
+      tags:
+        - Authors
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '404':
+          description: Автор не найден
+    put:
+      summary: Обновить информацию об авторе
+      tags:
+        - Authors
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+      responses:
+        '200':
+          description: Автор успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Автор не найден
+    delete:
+      summary: Удалить автора
+      tags:
+        - Authors
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Автор успешно удален
+        '404':
+          description: Автор не найден
+  /publishers:
+    get:
+      summary: Получить список всех издателей
+      tags:
+        - Publishers
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Publisher'
+    post:
+      summary: Создать нового издателя
+      tags:
+        - Publishers
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Publisher'
+      responses:
+        '200':
+          description: Издатель успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Publisher'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /publishers/{id}:
+    get:
+      summary: Получить информацию о конкретном издателе
+      tags:
+        - Publishers
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Publisher'
+        '404':
+          description: Издатель не найден
+    put:
+      summary: Обновить информацию об издателе
+      tags:
+        - Publishers
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Publisher'
+      responses:
+        '200':
+          description: Издатель успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Publisher'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Издатель не найден
+    delete:
+      summary: Удалить издателя
+      tags:
+        - Publishers
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Издатель успешно удален
+        '404':
+          description: Издатель не найден
+  /users:
+    get:
+      summary: Получить список всех пользователей
+      tags:
+        - Users
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Создать нового пользователя
+      tags:
+        - Users
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /users/{id}:
+    get:
+      summary: Получить информацию о конкретном пользователе
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Пользователь не найден
+    put:
+      summary: Обновить информацию о пользователе
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Пользователь успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Пользователь не найден
+    delete:
+      summary: Удалить пользователя
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Пользователь успешно удален
+        '404':
+          description: Пользователь не найден
+  /auth/register:
+    post:
+      summary: Регистрация нового пользователя
+      tags:
+        - Authentication
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInput'
+      responses:
+        '200':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '401':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/login:
+    post:
+      summary: Вход пользователя
+      tags:
+        - Authentication
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: Пользователь успешно вошел в систему
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '401':
+          description: Ошибка аутентификации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/logout:
+    delete:
+      summary: Выход пользователя
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: application/json
+          required: true
+      responses:
+        '200':
+          description: Пользователь успешно вышел из системы
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Иван Иванов
+        email:
+          type: string
+          format: email
+          example: ivan.ivanov@example.com
+        email_verified_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-01T12:00:00Z'
+        password:
+          type: string
+          example: hashedpassword
+        remember_token:
+          type: string
+          nullable: true
+          example: rememberme123456
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-01T12:00:00Z'
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-02T12:00:00Z'
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: Война и мир
+        description:
+          type: string
+          nullable: true
+          example: Классический роман Льва Толстого...
+        publication_year:
+          type: integer
+          example: 1869
+        isbn:
+          type: string
+          example: 978-3-16-148410-0
+        author_id:
+          type: integer
+          format: int64
+          example: 1
+        publisher_id:
+          type: integer
+          format: int64
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-01T12:00:00Z'
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-02T12:00:00Z'
+    Author:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Лев
+        surname:
+          type: string
+          example: Толстой
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          example: '1828-09-09'
+        biography:
+          type: string
+          nullable: true
+          example: Лев Николаевич Толстой был русским писателем...
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-01T12:00:00Z'
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-02T12:00:00Z'
+    Publisher:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Издательство АСТ
+        address:
+          type: string
+          nullable: true
+          example: Москва, ул. Пушкина, д. 1
+        phone:
+          type: string
+          nullable: true
+          example: +7 495 123-45-67
+        email:
+          type: string
+          format: email
+          example: contact@publisher.com
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-01T12:00:00Z'
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-02T12:00:00Z'
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        user_id:
+          type: integer
+          format: int64
+          example: 1
+        position:
+          type: string
+          example: Библиотекарь
+        phone:
+          type: string
+          example: +7 495 987-65-43
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-01T12:00:00Z'
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-02T12:00:00Z'
+    RegisterInput:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    LoginInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    AuthSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: boolean
+        message:
+          type: string
+        token:
+          type: string
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Ошибка валидации
+        errors:
+          type: array
+          items:
+            type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Ошибка валидации
+        errors:
+          type: array
+          items:
+            type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
