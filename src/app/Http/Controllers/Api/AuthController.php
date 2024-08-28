@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -53,13 +54,12 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
-            $validateUser = Validator::make($request->all(),
-                [
-                    'email' => 'required|email',
-                    'password' => 'required'
-                ]);
+            $validateUser = Validator::make($request->all(), [
+                'email' => 'required|email',
+                'password' => 'required'
+            ]);
 
-            if($validateUser->fails()){
+            if ($validateUser->fails()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Ошибка валидации',
@@ -67,7 +67,7 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            if(!Auth::attempt($request->only(['email', 'password']))){
+            if (!Auth::attempt($request->only(['email', 'password']))) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Email или пароль не совпадают.',
@@ -76,10 +76,18 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
 
+            $tokenName = 'API TOKEN';
+            $tokenAbilities = [];
+
+            if (Employee::where('user_id', $user->id)->exists()) {
+                $tokenName = 'Employee API TOKEN';
+                $tokenAbilities = ['shift-access'];
+            }
+
             return response()->json([
                 'status' => true,
                 'message' => 'Вы успешно вошли в учётную запись',
-                'token' => $user->createToken("API TOKEN")->plainTextToken
+                'token' => $user->createToken($tokenName, $tokenAbilities)->plainTextToken
             ], 200);
 
         } catch (\Throwable $th) {
