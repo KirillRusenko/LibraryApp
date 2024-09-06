@@ -2,23 +2,36 @@
 
 namespace App\Http\Middleware;
 
-use App\Traits\ClickHouseLoggable;
+use App\Services\RabbitMQService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiLogger
 {
-    use ClickHouseLoggable;
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
+    protected $rabbitMQService;
+
+    public function __construct(RabbitMQService $rabbitMQService)
+    {
+        $this->rabbitMQService = new $rabbitMQService;
+    }
+
     public function handle(Request $request, Closure $next): Response
     {
+        $response = $next($request);
 
-        $this->logToClickHouse($request->getRequestUri(), $request->getMethod(), $request->getContent());
-        return $next($request);
+        $content = str_contains('auth', $request->path()) ? $response->getContent(): null;
+
+        $logData = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'uri' => $request->path(),
+            'method' => $request->getMethod(),
+            'content' => $content,
+        ];
+
+        $this->rabbitMQService->publishMessage('api_logs', json_encode($logData));
+        $this->rabbitMQService->close();
+
+        return $response;
     }
 }

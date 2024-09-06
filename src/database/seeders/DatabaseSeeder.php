@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Author;
 use App\Models\Book;
+use App\Models\BookItem;
 use App\Models\Employee;
 use App\Models\Publisher;
 use App\Models\Shift;
@@ -24,5 +25,6 @@ class DatabaseSeeder extends Seeder
         Book::factory(50)->create();
         Employee::factory(10)->create();
         Shift::factory(5)->create();
+        BookItem::factory(150)->create();
     }
 }

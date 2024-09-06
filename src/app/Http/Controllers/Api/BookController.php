@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Book;
+use App\Models\BookItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -71,43 +72,31 @@ class BookController extends Controller
 
     public function available()
     {
-        $books = Book::where('is_borrowed', false)->get();
+        $bookItems = BookItem::where('is_borrowed', false)
+            ->where('condition', '!=', BookItem::CONDITION_ON_REPAIR)
+            ->get();
+
+        $availableBookIds = $bookItems->pluck('book_id')->unique();
+        $books = Book::whereIn('id', $availableBookIds)->get();
+
         return response()->json($books);
     }
 
     public function borrow($id)
     {
-        $book = Book::find($id);
+        $bookItem = BookItem::where('book_id', $id)
+            ->where('is_borrowed', false)
+            ->where('condition', '!=', BookItem::CONDITION_ON_REPAIR)
+            ->first();
 
-        if (!$book) {
-            return response()->json(['message' => 'Книга не найдена'], 404);
+        if (!$bookItem) {
+            return response()->json(['message' => 'Нет доступных экземпляров этой книги'], 404);
         }
 
-        if ($book->is_borrowed) {
-            return response()->json(['message' => 'Книга уже взята'], 400);
-        }
-
-        $book->is_borrowed = true;
-        $book->save();
+        $bookItem->is_borrowed = true;
+        $bookItem->last_borrowed_at = now();
+        $bookItem->save();
 
         return response()->json(['message' => 'Книга успешно взята'], 200);
-    }
-
-    public function return($id)
-    {
-        $book = Book::find($id);
-
-        if (!$book) {
-            return response()->json(['message' => 'Книга не найдена'], 404);
-        }
-
-        if (!$book->is_borrowed) {
-            return response()->json(['message' => 'Книга ещё не взята'], 400);
-        }
-
-        $book->is_borrowed = false;
-        $book->save();
-
-        return response()->json(['message' => 'Книга успешно возвращена'], 200);
     }
 }

@@ -30,16 +30,32 @@ services:
             - env/mysql.env
         volumes:
             - db_data:/var/lib/mysql
-    phpmyadmin:
-        depends_on:
-            -   mysql
-        image: phpmyadmin/phpmyadmin
-        restart: always
+    clickhouse:
+        image: yandex/clickhouse-server
         ports:
-            - 8080:80
+            - "8123:8123"
+            - "9000:9000"
+        volumes:
+            - ./clickhouse-data:/var/lib/clickhouse
+    mongo:
+        image: mongo:latest
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongo_data:/var/lib/mongo
         environment:
-            - PMA_HOST = host.docker.internal
-            - PMA_PORT = 3306
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: example
+    rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+        volumes:
+            - rabbitmq_data:/var/lib/rabbitmq
     composer:
         build:
             context: dockerfiles
@@ -53,12 +69,8 @@ services:
         volumes:
             - ./src:/var/www/laravel
         entrypoint: ["php", "/var/www/laravel/artisan"]
-    clickhouse:
-        image: yandex/clickhouse-server
-        ports:
-            - "8123:8123"
-            - "9000:9000"
-        volumes:
-            - ./clickhouse-data:/var/lib/clickhouse
 volumes:
     db_data:
+    mongo_data:
+    rabbitmq_data:
+    clickhouse_data:

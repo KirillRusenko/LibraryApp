@@ -71,6 +71,19 @@ return [
             'password' => env('CLICKHOUSE_PASSWORD', ''),
         ],
 
+        'mongodb' => [
+            'driver'   => 'mongodb',
+            'host'     => env('MONGO_HOST', 'mongo'),
+            'dsn'      => env('MONGO_DB_URI'),
+            'port'     => env('MONGO_PORT', 27017),
+            'database' => env('MONGO_DATABASE', 'local'),
+            'username' => env('MONGO_USERNAME', 'root'),
+            'password' => env('MONGO_PASSWORD', 'example'),
+            'options'  => [
+                'database' => env('MONGO_AUTHENTICATION_DATABASE', 'admin'),
+            ],
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
