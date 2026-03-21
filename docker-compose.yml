@@ -37,6 +37,11 @@ services:
             - "9000:9000"
         volumes:
             - ./clickhouse-data:/var/lib/clickhouse
+        environment:
+          CLICKHOUSE_DB: default
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: default
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     mongo:
         image: mongo:latest
         ports:
